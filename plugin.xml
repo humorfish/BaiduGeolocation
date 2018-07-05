@@ -1,2 +1,61 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-baidu-geolocation" version="0.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"><name>BaiduGeolocation</name><js-module name="BaiduGeolocation" src="www/BaiduGeolocation.js"><clobbers target="cordova.plugins.BaiduGeolocation" /></js-module><platform name="android"><config-file parent="/*" target="res/xml/config.xml"><feature name="BaiduGeolocation"><param name="android-package" value="cordova-baidu-geolocation.BaiduGeolocation" /></feature></config-file><config-file parent="/*" target="AndroidManifest.xml"></config-file><source-file src="src/android/BaiduGeolocation.java" target-dir="src/cordova-baidu-geolocation/BaiduGeolocation" /></platform></plugin>
+<plugin id="cordova-baidu-geolocation" version="0.0.1"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>BaiduGeolocation</name>
+
+    <preference name="API_KEY" />
+
+    <js-module name="BaiduGeolocation" src="www/BaiduGeolocation.js">
+        <clobbers target="BaiduGeolocation" />
+    </js-module>
+
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="BaiduGeolocation">
+                <param name="android-package" value="com.easytraval.geolocation.BaiduGeolocation" />
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <!-- 这个权限用于进行网络定位-->
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+            <!-- 这个权限用于访问GPS定位-->
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
+            <!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位-->
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
+            <!-- 获取运营商信息，用于支持提供运营商信息相关的接口-->
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
+            <!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
+            <!-- 用于读取手机当前的状态-->
+            <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+            <!-- 写入扩展存储，向扩展卡写入数据，用于写入离线定位数据-->
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+            <!-- 访问网络，网络定位需要上网-->
+            <uses-permission android:name="android.permission.INTERNET" />
+            <!-- SD卡读取权限，用户写入离线定位数据-->
+            <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"></uses-permission>
+            <uses-feature android:name="android.hardware.location.gps" />
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <service android:name="com.baidu.location.f" android:enabled="true" android:process=":remote"></service>
+            <meta-data android:name="com.baidu.lbsapi.API_KEY" android:value="$API_KEY"/>
+        </config-file>
+
+        <source-file src="src/android/service/LocationService.java" target-dir="src/com/easytraval/geolocation/service" />
+        <source-file src="src/android/w3/Coordinates.java" target-dir="src/com/easytraval/geolocation/w3" />
+        <source-file src="src/android/w3/Position.java" target-dir="src/com/easytraval/geolocation/w3" />
+        <source-file src="src/android/w3/PositionOptions.java" target-dir="src/com/easytraval/geolocation/w3" />
+        <source-file src="src/android/w3/PositionError.java" target-dir="src/com/easytraval/geolocation/w3" />
+
+        <source-file src="src/android/MessageBuilder.java" target-dir="src/com/easytraval/geolocation" />
+        <source-file src="src/android/BaiduGeolocation.java" target-dir="src/com/easytraval/geolocation" />
+
+        <source-file src="src/android/libs/armeabi/liblocSDK7b.so" target-dir="libs/armeabi" />
+        <source-file src="src/android/libs/armeabi-v7a/liblocSDK7b.so" target-dir="libs/armeabi-v7a" />
+        <source-file src="src/android/libs/BaiduLBS_Android.jar" target-dir="libs" />
+
+        <dependency id="cordova-plugin-compat" version="^1.0.0" />
+    </platform>
+</plugin>

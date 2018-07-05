@@ -1,4 +1,4 @@
-package com.eteng.geolocation.w3;
+package com.easytraval.geolocation.w3;
 
 import org.json.JSONException;
 import org.json.JSONObject;

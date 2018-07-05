@@ -1,7 +1,18 @@
-package cordova-baidu-geolocation;
+package com.easytraval.geolocation;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
+import org.apache.cordova.PermissionHelper;
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDAbstractLocationListener;
+
+import com.easytraval.geolocation.w3.PositionOptions;
+import com.easytraval.geolocation.service.LocationService;
+
+import android.Manifest;
+import android.util.Log;
+import android.content.pm.PackageManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,7 +29,8 @@ public class BaiduGeolocation extends CordovaPlugin {
     private static final int WATCH_POSITION = 1;
     private static final int CLEAR_WATCH = 2;
 
-    private SparseArray<BDGeolocation> store = new SparseArray<BDGeolocation>();
+    private LocationService locationService = null;
+//    private SparseArray<BDGeolocation> store = new SparseArray<BDGeolocation>();
     private String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
 
     private JSONArray requestArgs;
@@ -28,74 +40,81 @@ public class BaiduGeolocation extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         Log.i(TAG, "插件调用");
         JSONObject options = new JSONObject();
+        if (locationService == null)
+            locationService = new LocationService(cordova.getActivity());
 
         requestArgs = args;
         context = callbackContext;
 
         if (action.equals("getCurrentPosition")) {
-            getPermission(GET_CURRENT_POSITION);
-            try {
-                options = args.getJSONObject(0);
-            }
-            catch (JSONException e) {
-                Log.v(TAG, "options 未传入");
-            }
-            return getCurrentPosition(options, callbackContext);
+                getPermission(GET_CURRENT_POSITION);
+                try {
+                    options = args.getJSONObject(0);
+                }
+                catch (JSONException e) {
+                    Log.v(TAG, "options 未传入");
+                }
+                return getCurrentPosition(options, callbackContext);
+
         } else if (action.equals("watchPosition")) {
-            getPermission(WATCH_POSITION);
-            try {
-                options = args.getJSONObject(0);
-            }
-            catch (JSONException e) {
-                Log.v(TAG, "options 未传入");
-            }
-            int watchId = args.getInt(1);
-            return watchPosition(options, watchId, callbackContext);
+                getPermission(WATCH_POSITION);
+                try {
+                    options = args.getJSONObject(0);
+                }
+                catch (JSONException e) {
+                    Log.v(TAG, "options 未传入");
+                }
+                int watchId = args.getInt(1);
+                return watchPosition(options, watchId, callbackContext);
+
         } else if (action.equals("clearWatch")) {
-            getPermission(CLEAR_WATCH);
-            int watchId = args.getInt(0);
-            return clearWatch(watchId, callbackContext);
+                getPermission(CLEAR_WATCH);
+                int watchId = args.getInt(0);
+                return clearWatch(watchId, callbackContext);
         }
+
         return false;
     }
 
 
     private boolean clearWatch(int watchId, CallbackContext callback) {
         Log.i(TAG, "停止监听");
-        BDGeolocation geolocation = store.get(watchId);
-        store.remove(watchId);
-        geolocation.clearWatch();
-        callback.success();
+//        BDGeolocation geolocation = store.get(watchId);
+//        store.remove(watchId);
+//        geolocation.clearWatch();
+//        callback.success();
         return true;
     }
 
     private boolean watchPosition(JSONObject options, int watchId, final CallbackContext callback) {
         Log.i(TAG, "监听位置变化");
-        Context ctx = cordova.getActivity().getApplicationContext();
-        PositionOptions positionOpts = new PositionOptions(options);
-        BDGeolocation geolocation = new BDGeolocation(ctx);
-        store.put(watchId, geolocation);
-        return geolocation.watchPosition(positionOpts, new BDLocationListener() {
+//        Context ctx = cordova.getActivity().getApplicationContext();
+//        PositionOptions positionOpts = new PositionOptions(options);
+//        BDGeolocation geolocation = new BDGeolocation(ctx);
+//        store.put(watchId, geolocation);
+//        return geolocation.watchPosition(positionOpts, new BDAbstractLocationListener() {
+//            @Override
+//            public void onReceiveLocation(BDLocation location) {
+//                JSONArray message = new MessageBuilder(location).build();
+//                PluginResult result = new PluginResult(PluginResult.Status.OK, message);
+//                result.setKeepCallback(true);
+//                callback.sendPluginResult(result);
+//            }
+//        });
+        return false;
+    }
+
+    private boolean getCurrentPosition(JSONObject options, final CallbackContext callback) {
+        Log.i(TAG, "请求当前地理位置");
+
+//        locationService.setLocationOption(options);
+        return locationService.getCurrentPosition(null, new BDAbstractLocationListener() {
             @Override
             public void onReceiveLocation(BDLocation location) {
                 JSONArray message = new MessageBuilder(location).build();
                 PluginResult result = new PluginResult(PluginResult.Status.OK, message);
                 result.setKeepCallback(true);
                 callback.sendPluginResult(result);
-            }
-        });
-    }
-
-    private boolean getCurrentPosition(JSONObject options, final CallbackContext callback) {
-        Log.i(TAG, "请求当前地理位置");
-        Context ctx = cordova.getActivity().getApplicationContext();
-        PositionOptions positionOpts = new PositionOptions(options);
-        BDGeolocation geolocation = new BDGeolocation(ctx);
-        return geolocation.getCurrentPosition(positionOpts, new BDLocationListener() {
-            @Override
-            public void onReceiveLocation(BDLocation location) {
-                JSONArray message = new MessageBuilder(location).build();
-                callback.success(message);
             }
         });
     }
@@ -135,9 +154,11 @@ public class BaiduGeolocation extends CordovaPlugin {
                 case GET_CURRENT_POSITION:
                     getCurrentPosition(this.requestArgs.getJSONObject(0), this.context);
                     break;
+
                 case WATCH_POSITION:
                     watchPosition(this.requestArgs.getJSONObject(0), this.requestArgs.getInt(1), this.context);
                     break;
+
                 case CLEAR_WATCH:
                     clearWatch(this.requestArgs.getInt(0), this.context);
                     break;

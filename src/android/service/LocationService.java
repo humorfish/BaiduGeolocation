@@ -1,10 +1,12 @@
-package com.baidu.location.service;
+package com.easytraval.geolocation.service;
 
+import com.baidu.location.BDLocation;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.location.LocationClientOption.LocationMode;
 import android.content.Context;
+import android.util.Log;
 
 /**
  * 
@@ -12,8 +14,12 @@ import android.content.Context;
  *
  */
 public class LocationService {
+	private static final String TAG = "LocationService";
+
 	private LocationClient client = null;
-	private LocationClientOption mOption,DIYoption;
+	private BDAbstractLocationListener listener;
+
+	private LocationClientOption mOption, DIYoption;
 	private Object objLock = new Object();
 
 	/***
@@ -48,6 +54,8 @@ public class LocationService {
 		if(listener != null){
 			client.unRegisterLocationListener(listener);
 		}
+
+		listener = null;
 	}
 	
 	/***
@@ -55,15 +63,15 @@ public class LocationService {
 	 * @param option
 	 * @return isSuccessSetOption
 	 */
-	public boolean setLocationOption(LocationClientOption option){
-		boolean isSuccess = false;
-		if(option != null){
-			if(client.isStarted())
-				client.stop();
-			DIYoption = option;
-			client.setLocOption(option);
-		}
-		return isSuccess;
+	public void setLocationOption(LocationClientOption option){
+		if(option == null)
+			DIYoption = getDefaultLocationClientOption();
+
+		if(client.isStarted())
+			client.stop();
+
+		DIYoption = option;
+		client.setLocOption(DIYoption);
 	}
 
 	/***
@@ -101,6 +109,36 @@ public class LocationService {
 			DIYoption = new LocationClientOption();
 		}
 		return DIYoption;
+	}
+
+	public boolean getCurrentPosition(LocationClientOption options, final BDAbstractLocationListener callback) {
+		listener = new BDAbstractLocationListener() {
+			@Override
+			public void onReceiveLocation(BDLocation location) {
+				Log.i(TAG, "onReceiveLocation.Longitude: " + location.getLongitude());
+				Log.i(TAG, "onReceiveLocation.getLatitude: " + location.getLatitude());
+				callback.onReceiveLocation(location);
+				clearWatch();
+			}
+		};
+//		setLocationOption(options);
+		client.registerLocationListener(listener);
+		start();
+		return true;
+	}
+
+	public boolean watchPosition(LocationClientOption options, BDAbstractLocationListener callback) {
+		listener = callback;
+		setLocationOption(options);
+		client.registerLocationListener(listener);
+		client.start();
+		return true;
+	}
+
+	public boolean clearWatch() {
+		stop();
+		unregisterListener(listener);
+		return true;
 	}
 
 	public void start(){

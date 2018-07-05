@@ -1,0 +1,22 @@
+{
+  "name": "cordova-baidu-geolocation",
+  "version": "0.0.1",
+  "description": "Baidu Geolocation for Cordova",
+  "main": "BaiduGeolocation.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/humorfish/BaiduGeolocation.git"
+  },
+  "keywords": [
+    "geolocation"
+  ],
+  "author": "humorfish",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/humorfish/BaiduGeolocation/issues"
+  },
+  "homepage": "https://github.com/humorfish/BaiduGeolocation#readme"
+}
