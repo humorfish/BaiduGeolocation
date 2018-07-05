@@ -16,15 +16,13 @@ public class PositionOptions {
 
     public PositionOptions(JSONObject options) {
         try {
-            this.enableHighAccuracy = options.getBoolean("enableHighAccuracy");
-        }
-        catch (JSONException e) {
+            enableHighAccuracy = options.getBoolean("enableHighAccuracy");
+        } catch (JSONException e) {
             Log.v(TAG, "enableHighAccuracy 未定义");
         }
         try {
-            this.coorType = options.getString("coorType");
-        }
-        catch (JSONException e) {
+            coorType = options.getString("coorType");
+        } catch (JSONException e) {
             Log.v(TAG, "coorType 未定义");
         }
     }

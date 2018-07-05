@@ -64,14 +64,12 @@ public class LocationService {
 	 * @return isSuccessSetOption
 	 */
 	public void setLocationOption(LocationClientOption option){
-		if(option == null)
-			DIYoption = getDefaultLocationClientOption();
-
-		if(client.isStarted())
-			client.stop();
-
-		DIYoption = option;
-		client.setLocOption(DIYoption);
+		if(option != null){
+			if(client.isStarted())
+				client.stop();
+			DIYoption = option;
+			client.setLocOption(option);
+		}
 	}
 
 	/***
@@ -104,14 +102,40 @@ public class LocationService {
 	 *
 	 * @return DIYOption 自定义Option设置
 	 */
-	public LocationClientOption getOption(){
-		if(DIYoption == null) {
-			DIYoption = new LocationClientOption();
+	public LocationClientOption getOption(JSONObject options) {
+
+		if (mOption == null) {
+			mOption = getDefaultLocationClientOption();
 		}
-		return DIYoption;
+
+		try {
+			boolean enableHighAccuracy = options.getBoolean("enableHighAccuracy");
+			if (enableHighAccuracy == false)
+				mOption.setLocationMode(LocationMode.Battery_Saving);//可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
+		} catch (JSONException e) {
+			Log.v(TAG, "enableHighAccuracy 未定义");
+		}
+
+		try {
+			String coorType = options.getString("coorType");
+			if (coorType != null && !coorType.trim().isEmpty())
+				mOption.setCoorType(coorType);
+		} catch (JSONException e) {
+			Log.v(TAG, "coorType 未定义");
+		}
+
+		try {
+			long timeout = options.getLong("timeout");
+			if (timeout != null)
+				mOption.setTimeOut(timeout)
+		} catch (JSONException e) {
+			Log.v(TAG, "timeout 未定义");
+		}
+
+		return mOption;
 	}
 
-	public boolean getCurrentPosition(LocationClientOption options, final BDAbstractLocationListener callback) {
+	public boolean getCurrentPosition(JSONObject options, final BDAbstractLocationListener callback) {
 		listener = new BDAbstractLocationListener() {
 			@Override
 			public void onReceiveLocation(BDLocation location) {
@@ -121,17 +145,23 @@ public class LocationService {
 				clearWatch();
 			}
 		};
-//		setLocationOption(options);
+
+		if (options != null)
+			setLocationOption(getOption(options));
+
 		client.registerLocationListener(listener);
 		start();
 		return true;
 	}
 
-	public boolean watchPosition(LocationClientOption options, BDAbstractLocationListener callback) {
+	public boolean watchPosition(JSONObject options, BDAbstractLocationListener callback) {
 		listener = callback;
-		setLocationOption(options);
+
+		if (options != null)
+			setLocationOption(getOption(options));
+
 		client.registerLocationListener(listener);
-		client.start();
+		start();
 		return true;
 	}
 
