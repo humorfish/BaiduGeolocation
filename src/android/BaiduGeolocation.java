@@ -62,7 +62,7 @@ public class BaiduGeolocation extends CordovaPlugin {
                 Log.v(TAG, "options 未传入");
             }
             int watchId = args.getInt(1);
-            return watchPosition(options, watchId, callbackContext);
+            return watchPosition(options, callbackContext);
 
         } else if (action.equals("clearWatch")) {
             getPermission(CLEAR_WATCH);
@@ -96,8 +96,6 @@ public class BaiduGeolocation extends CordovaPlugin {
                     callback.sendPluginResult(result);
             }
         });
-
-        return false;
     }
 
     private boolean getCurrentPosition(JSONObject options, final CallbackContext callback) {
@@ -147,7 +145,7 @@ public class BaiduGeolocation extends CordovaPlugin {
                 getCurrentPosition(this.requestArgs.getJSONObject(0), this.context);
             } else if (requestCode == WATCH_POSITION) {
                 watchPosition(this.requestArgs.getJSONObject(0), this.context);
-            } else if (requestCode == CLEAR_WATCH)
+            } else if (requestCode == CLEAR_WATCH) {
                 clearWatch(this.context);
             }
         }

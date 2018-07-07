@@ -8,6 +8,9 @@ import com.baidu.location.LocationClientOption.LocationMode;
 import android.content.Context;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * 
  * @author baidu
@@ -19,7 +22,7 @@ public class LocationService {
 	private LocationClient client = null;
 	private BDAbstractLocationListener listener;
 
-	private LocationClientOption mOption, DIYoption;
+	private LocationClientOption mOption;
 	private Object objLock = new Object();
 
 	/***
@@ -67,7 +70,6 @@ public class LocationService {
 		if(option != null){
 			if(client.isStarted())
 				client.stop();
-			DIYoption = option;
 			client.setLocOption(option);
 		}
 	}
@@ -100,7 +102,7 @@ public class LocationService {
 
 	/**
 	 *
-	 * @return DIYOption 自定义Option设置
+	 * @return mOption 自定义Option设置
 	 */
 	public LocationClientOption getOption(JSONObject options) {
 
@@ -126,8 +128,8 @@ public class LocationService {
 
 		try {
 			long timeout = options.getLong("timeout");
-			if (timeout != null)
-				mOption.setTimeOut(timeout)
+			if (timeout > 0)
+				mOption.setTimeOut((int)timeout);
 		} catch (JSONException e) {
 			Log.v(TAG, "timeout 未定义");
 		}
