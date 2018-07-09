@@ -76,9 +76,12 @@ public class BaiduGeolocation extends CordovaPlugin {
     private boolean clearWatch(CallbackContext callback) {
         Log.i(TAG, "停止监听");
 
-        locationService.clearWatch();
-        if (callback != null)
-            callback.success();
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                locationService.clearWatch();
+                if (callback != null)
+                    callback.success();
+            }});
 
         return true;
     }
@@ -86,29 +89,38 @@ public class BaiduGeolocation extends CordovaPlugin {
     private boolean watchPosition(JSONObject options, final CallbackContext callback) {
         Log.i(TAG, "监听位置变化");
 
-        return locationService.watchPosition(options, new BDAbstractLocationListener() {
-            @Override
-            public void onReceiveLocation(BDLocation location) {
-                JSONArray message = new MessageBuilder(location).build();
-                PluginResult result = new PluginResult(PluginResult.Status.OK, message);
-                result.setKeepCallback(true);
-                if (callback != null)
-                    callback.sendPluginResult(result);
-            }
-        });
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                locationService.watchPosition(options, new BDAbstractLocationListener() {
+                    @Override
+                    public void onReceiveLocation(BDLocation location) {
+                        JSONArray message = new MessageBuilder(location).build();
+                        PluginResult result = new PluginResult(PluginResult.Status.OK, message);
+                        result.setKeepCallback(true);
+                        if (callback != null)
+                            callback.sendPluginResult(result);
+                    }
+                });
+            }});
+
+        return true;
     }
 
     private boolean getCurrentPosition(JSONObject options, final CallbackContext callback) {
         Log.i(TAG, "请求当前地理位置");
 
-        return locationService.getCurrentPosition(options, new BDAbstractLocationListener() {
-            @Override
-            public void onReceiveLocation(BDLocation location) {
-                JSONArray message = new MessageBuilder(location).build();
-                if (callback != null)
-                    callback.success(message);
-            }
-        });
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                locationService.getCurrentPosition(options, new BDAbstractLocationListener() {
+                    @Override
+                    public void onReceiveLocation(BDLocation location) {
+                        JSONArray message = new MessageBuilder(location).build();
+                        if (callback != null)
+                            callback.success(message);
+                    }
+                });
+            }});
+        return true;
     }
 
     /**
